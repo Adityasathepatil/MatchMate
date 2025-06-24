@@ -423,7 +423,9 @@ fun UserCard(
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.error
                             ),
-                            modifier = Modifier.weight(1f).height(40.dp)
+                            modifier = Modifier.weight(1f).height(60.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 2.dp)
+
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
@@ -435,7 +437,8 @@ fun UserCard(
 
                         Button(
                             onClick = onAccept,
-                            modifier = Modifier.weight(1f).height(40.dp)
+                            modifier = Modifier.weight(1f).height(60.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 2.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Check,
