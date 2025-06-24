@@ -8,8 +8,11 @@ import com.tech.matchmate.domain.models.User
 import com.tech.matchmate.domain.models.enums.MatchStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +26,19 @@ class MainViewModel @Inject constructor(
 
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users: StateFlow<List<User>> = _users.asStateFlow()
+
+
+    val pendingUsers: StateFlow<List<User>> = _users.map { users ->
+        users.filter { it.status == MatchStatus.PENDING }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+
+    val acceptedUsers: StateFlow<List<User>> = _users.map { users ->
+        users.filter { it.status == MatchStatus.ACCEPTED }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
+
+    val declinedUsers: StateFlow<List<User>> = _users.map { users ->
+        users.filter { it.status == MatchStatus.DECLINED }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     init {
         loadUsers()
@@ -44,7 +60,6 @@ class MainViewModel @Inject constructor(
                     _users.value = usersWithScores
                     _uiState.value = _uiState.value.copy(isLoading = false)
                 } else {
-
                     val cachedUsers = userRepository.getCachedUsers()
                     if (cachedUsers.isNotEmpty()) {
                         _users.value = cachedUsers
@@ -76,6 +91,10 @@ class MainViewModel @Inject constructor(
         updateUserStatus(userId, MatchStatus.DECLINED)
     }
 
+    fun undoAction(userId: String) {
+        updateUserStatus(userId, MatchStatus.PENDING)
+    }
+
     private fun updateUserStatus(userId: String, status: MatchStatus) {
         viewModelScope.launch {
             try {
@@ -97,6 +116,7 @@ class MainViewModel @Inject constructor(
         loadUsers()
     }
 }
+
 
 data class UiState(
     val isLoading: Boolean = false,
